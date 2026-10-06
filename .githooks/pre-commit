@@ -1,0 +1,2 @@
+#!/bin/sh
+exec python scripts/scan_secrets.py
