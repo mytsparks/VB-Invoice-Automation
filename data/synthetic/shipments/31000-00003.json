@@ -1,0 +1,57 @@
+{
+  "Status": "SUCCESS",
+  "details": {
+    "id": 91000003,
+    "customId": "31000-00003",
+    "status": {
+      "code": {
+        "key": "2101",
+        "value": "Delivered"
+      }
+    },
+    "modeInfo": [],
+    "carrierOrder": [
+      {
+        "id": 71000003,
+        "carrier": {
+          "id": 6003,
+          "name": "Sunrise Cargo Movers"
+        },
+        "costs": {
+          "totalAmount": 900.0,
+          "transactionCurrency": {
+            "key": "1500",
+            "value": "USD"
+          },
+          "lineItem": [
+            {
+              "code": {
+                "key": "1600",
+                "value": "Drayage"
+              },
+              "qty": 1,
+              "price": 800.0,
+              "amount": 800.0,
+              "id": 200
+            },
+            {
+              "code": {
+                "key": "1600",
+                "value": "Chassis fee"
+              },
+              "qty": 1,
+              "price": 100.0,
+              "amount": 100.0,
+              "id": 201
+            }
+          ]
+        },
+        "payment": []
+      }
+    ]
+  },
+  "simulation": {
+    "synthetic": true,
+    "reject_attach_document": "Document type is not enabled for this account (simulated rejection)."
+  }
+}

@@ -29,6 +29,8 @@ class AppConfig:
     run_cost_cap_usd: Decimal
     low_confidence_threshold: float
     tms_mode: str
+    tms_fixture_dirs: tuple[Path, ...]
+    tms_max_writes_per_run: int
     django_secret_key: Secret | None
     debug: bool
     database_path: Path
@@ -59,6 +61,7 @@ def load_config(base_dir: Path, environ=None) -> AppConfig:
         cost_cap = Decimal(environ.get("LLM_RUN_COST_CAP_USD", "5.00"))
         max_docs = int(environ.get("LLM_MAX_DOCS_PER_RUN", "25"))
         threshold = float(environ.get("LOW_CONFIDENCE_THRESHOLD", "0.85"))
+        max_writes = int(environ.get("TMS_MAX_WRITES_PER_RUN", "50"))
     except (InvalidOperation, ValueError) as exc:
         raise ConfigError(f"A numeric setting in .env is not valid ({exc}).") from exc
 
@@ -74,6 +77,8 @@ def load_config(base_dir: Path, environ=None) -> AppConfig:
         run_cost_cap_usd=cost_cap,
         low_confidence_threshold=threshold,
         tms_mode=environ.get("TMS_MODE", "mock").strip().lower(),
+        tms_fixture_dirs=(base_dir / "data" / "fixtures" / "shipments", base_dir / "data" / "synthetic" / "shipments"),
+        tms_max_writes_per_run=max_writes,
         django_secret_key=_secret(environ, "DJANGO_SECRET_KEY"),
         debug=_flag(environ.get("DJANGO_DEBUG", "false")),
         database_path=database_path,

@@ -4,6 +4,7 @@ Run with: python scripts/make_synthetic.py
 Uses no third party libraries. Each PDF is plain text, so it is only a smoke test
 for the pipeline and says little about how real scans will extract.
 """
+import json
 from pathlib import Path
 
 OUT = Path(__file__).resolve().parent.parent / "data" / "synthetic"
@@ -87,11 +88,62 @@ SAMPLES = {
 }
 
 
+def shipment(index, shipment_id, carrier, currency, lines, container="", **simulation):
+    """A Turvo style shipment response, as returned by GET /shipments/{id}."""
+    total = round(sum(amount for _, amount in lines), 2)
+    return {
+        "Status": "SUCCESS",
+        "details": {
+            "id": 91000000 + index,
+            "customId": shipment_id,
+            "status": {"code": {"key": "2101", "value": "Delivered"}},
+            "modeInfo": [{"containerNumber": container}] if container else [],
+            "carrierOrder": [{
+                "id": 71000000 + index,
+                "carrier": {"id": 6000 + index, "name": carrier},
+                "costs": {
+                    "totalAmount": total,
+                    "transactionCurrency": {"key": "1500", "value": currency},
+                    "lineItem": [
+                        {"code": {"key": "1600", "value": name}, "qty": 1, "price": amount, "amount": amount, "id": 200 + i}
+                        for i, (name, amount) in enumerate(lines)
+                    ],
+                },
+                "payment": [],
+            }],
+        },
+        "simulation": {"synthetic": True, **simulation},
+    }
+
+
+# Shipments for the synthetic invoices. Each one is built to give a different match result.
+SHIPMENTS = [
+    # Exact match, so it is ready to process.
+    shipment(1, "31000-00001", "Northwind Freight Lines", "USD",
+             [("Freight - flat", 1250.00), ("Fuel surcharge", 187.50), ("Detention", 150.00)], container="TEST1234567"),
+    # Shipment lacks GST, so the invoice total is over and GST is an unknown charge.
+    shipment(2, "31000-00002", "Maple Leaf Haulage", "CAD",
+             [("Freight - flat", 2400.00), ("Border fee", 75.00)]),
+    # Matches, but the simulated TMS rejects the document upload.
+    shipment(3, "31000-00003", "Sunrise Cargo Movers", "USD",
+             [("Drayage", 800.00), ("Chassis fee", 100.00)],
+             reject_attach_document="Document type is not enabled for this account (simulated rejection)."),
+    # The statement prints 31000-00004, which is one digit off. The match step suggests this one.
+    shipment(4, "31000-00014", "Sunrise Cargo Movers", "USD", [("Drayage", 450.00)]),
+]
+
+
 def main():
     OUT.mkdir(parents=True, exist_ok=True)
     for name, lines in SAMPLES.items():
         (OUT / name).write_bytes(pdf(lines))
         print(f"wrote {OUT / name}")
+    shipments_dir = OUT / "shipments"
+    shipments_dir.mkdir(exist_ok=True)
+    for payload in SHIPMENTS:
+        path = shipments_dir / f"{payload['details']['customId']}.json"
+        path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
+        print(f"wrote {path}")
 
 
 if __name__ == "__main__":

@@ -3,6 +3,8 @@ from django.core.management.base import BaseCommand
 
 from extraction.models import ExtractionRun, Invoice
 from intake.models import Document
+from matching.models import MatchResult
+from matching.render import render_match
 
 
 def money(value) -> str:
@@ -78,6 +80,15 @@ class Command(BaseCommand):
             out(f"    Notes: {invoice.notes}")
         for reason in invoice.review_reasons:
             out(f"    Review reason: {reason}")
+        match = MatchResult.objects.filter(invoice=invoice).first()
+        if match is None:
+            out("    Not matched yet. Run python manage.py match.")
+        else:
+            out("")
+            render_match(out, self.style, invoice, match)
+            for write in invoice.tms_writes.all():
+                detail = write.reference or write.error
+                out(f"    TMS write: {write.get_operation_display()} on {write.shipment_id} [{write.mode}] {write.status} {detail}")
 
     def show_totals(self, documents):
         runs = ExtractionRun.objects.filter(document__in=documents)

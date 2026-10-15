@@ -51,12 +51,21 @@ class ExtractSummary:
     lines: list[str] = field(default_factory=list)
 
 
+def current_invoices():
+    """Invoices from the latest successful extraction of each document. Older runs are history."""
+    latest = {}
+    for run_id, document_id in ExtractionRun.objects.filter(status=ExtractionRun.Status.SUCCESS).order_by("id").values_list("id", "document_id"):
+        latest[document_id] = run_id
+    return Invoice.objects.filter(extraction_run_id__in=latest.values())
+
+
 def review_reasons(fields: dict, threshold: float) -> list[str]:
     reasons = []
     for name in CRITICAL_FIELDS:
         detail = fields[name]
         if detail["value"] is None:
-            reasons.append(f"{name} is missing")
+            if name != "currency":  # a missing currency is assumed from the shipment during matching
+                reasons.append(f"{name} is missing")
         elif detail["confidence"] < threshold:
             reasons.append(f"{name} has low confidence ({detail['confidence']:.2f})")
     return reasons
@@ -71,7 +80,7 @@ def store_invoices(document: Document, run: ExtractionRun, result: ExtractionRes
                 "rationale": getattr(data, name).rationale,
                 "page": getattr(data, name).page,
             }
-            for name in CRITICAL_FIELDS
+            for name in (*CRITICAL_FIELDS, "factoring_company")
         }
         reasons = review_reasons(fields, threshold)
         total = parse_amount(fields["total_amount"]["value"])
@@ -93,6 +102,7 @@ def store_invoices(document: Document, run: ExtractionRun, result: ExtractionRes
             shipment_id=shipment_id,
             shipment_id_raw=fields["shipment_id"]["value"] or "",
             carrier_name=fields["carrier_name"]["value"] or "",
+            factoring_company=fields["factoring_company"]["value"] or "",
             invoice_number=fields["invoice_number"]["value"] or "",
             invoice_date=invoice_date,
             currency=normalize_currency(fields["currency"]["value"]),
@@ -243,7 +253,7 @@ def extract_documents(
                 continue
             run.status = ExtractionRun.Status.SUCCESS
             run.save()
-            if result.document_type == "carrier_invoice" and result.invoices:
+            if result.invoices:
                 store_invoices(document, run, result, config.low_confidence_threshold)
                 document.status = Document.Status.EXTRACTED
                 summary.extracted += 1

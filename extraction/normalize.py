@@ -30,11 +30,30 @@ def parse_amount(text: str | None) -> Decimal | None:
 
 
 def parse_date(text: str | None) -> date | None:
-    """Only ISO dates are trusted. The prompt asks for ISO and null when the order is ambiguous."""
+    """Parse a printed date. Numeric dates are accepted only when the day and month order is clear.
+
+    A date like 03/04/2026 returns None so it goes to review instead of being guessed.
+    """
     if not text:
         return None
+    cleaned = text.strip()
+    for fmt in ("%Y-%m-%d", "%B %d, %Y", "%b %d, %Y", "%d %B %Y", "%d %b %Y", "%d-%b-%Y"):
+        try:
+            return datetime.strptime(cleaned, fmt).date()
+        except ValueError:
+            continue
+    match = re.fullmatch(r"(\d{1,2})[/.-](\d{1,2})[/.-](\d{4})", cleaned)
+    if not match:
+        return None
+    first, second, year = (int(part) for part in match.groups())
+    if first > 12 >= second:
+        day, month = first, second
+    elif second > 12 >= first:
+        month, day = first, second
+    else:
+        return None
     try:
-        return datetime.strptime(text.strip(), "%Y-%m-%d").date()
+        return date(year, month, day)
     except ValueError:
         return None
 

@@ -45,6 +45,7 @@ class Invoice(models.Model):
     shipment_id = models.CharField(max_length=20, blank=True, help_text="Only set when it matches 31xxx-xxxxx.")
     shipment_id_raw = models.CharField(max_length=100, blank=True)
     carrier_name = models.CharField(max_length=200, blank=True)
+    factoring_company = models.CharField(max_length=200, blank=True)
     invoice_number = models.CharField(max_length=100, blank=True)
     invoice_date = models.DateField(null=True, blank=True)
     currency = models.CharField(max_length=3, blank=True)

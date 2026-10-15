@@ -2,7 +2,7 @@ from pathlib import Path
 
 from django.conf import settings
 
-CURRENT_PROMPT = "invoice_extraction/v1"
+CURRENT_PROMPT = "invoice_extraction/v2"
 
 
 def load_prompt(version: str = CURRENT_PROMPT) -> str:

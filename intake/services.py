@@ -50,7 +50,7 @@ def ingest_folder(folder: Path, out=None) -> IngestSummary:
     """Register files from a folder. Originals are only read, never changed or moved."""
     summary = IngestSummary()
     write = out or (lambda message: None)
-    for path in sorted(p for p in folder.rglob("*") if p.is_file()):
+    for path in sorted(p for p in folder.rglob("*") if p.is_file() and "shipments" not in p.relative_to(folder).parts):
         media_type = MEDIA_TYPES.get(path.suffix.lower())
         data = path.read_bytes()
         digest = hashlib.sha256(data).hexdigest()

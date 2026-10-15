@@ -10,7 +10,9 @@ Pipeline
 4. Validation applies versioned tolerance rules, raises the ten flags and sets an outcome of ready or needs review.
 5. Reporting writes the daily processing summary and a review list as CSV files.
 
-The audit GUI, reviewer decisions and any Turvo write-back come in later iterations.
+6. Processing sends invoices marked ready to the configured TMS, which is the simulated TMS by default and the Turvo sandbox when access exists. It attaches the invoice document, posts the cost line and records every write.
+
+The audit GUI, reviewer decisions and any write to a production TMS come in later iterations.
 
 Django Layout
 
@@ -20,7 +22,7 @@ One Django project with a few small apps. Management commands are the command li
 - extraction covers the extraction adapter, the Claude implementation, the prompt library loader and result storage.
 - matching covers shipment resolution, tolerance rules, flags and outcomes.
 - reporting covers the evaluation, daily summary and review list commands.
-- tms is a plain Python package with the client interface, the mock implementation and the guarded read-only sandbox implementation.
+- tms is a plain Python package with the client interface, the simulated implementation and the guarded sandbox implementation, both of which can read and write.
 - config holds the settings module, secret handling and guardrail checks.
 
 Prompts live in a versioned prompts folder at the repository root.
@@ -41,5 +43,6 @@ Design Notes
 
 - Every pipeline stage records a status so it can be rerun safely.
 - Extraction results are cached by content hash, prompt version and model.
-- The TMS client is an interface, so the mock and the sandbox implementation are interchangeable.
+- The TMS client is an interface, so the simulated and sandbox implementations are interchangeable.
+- Every TMS write is recorded with an idempotency key, so a rerun never writes the same thing twice.
 - Secrets and client data follow the guardrails in PLAN.md.

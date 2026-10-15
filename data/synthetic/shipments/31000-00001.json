@@ -1,0 +1,70 @@
+{
+  "Status": "SUCCESS",
+  "details": {
+    "id": 91000001,
+    "customId": "31000-00001",
+    "status": {
+      "code": {
+        "key": "2101",
+        "value": "Delivered"
+      }
+    },
+    "modeInfo": [
+      {
+        "containerNumber": "TEST1234567"
+      }
+    ],
+    "carrierOrder": [
+      {
+        "id": 71000001,
+        "carrier": {
+          "id": 6001,
+          "name": "Northwind Freight Lines"
+        },
+        "costs": {
+          "totalAmount": 1587.5,
+          "transactionCurrency": {
+            "key": "1500",
+            "value": "USD"
+          },
+          "lineItem": [
+            {
+              "code": {
+                "key": "1600",
+                "value": "Freight - flat"
+              },
+              "qty": 1,
+              "price": 1250.0,
+              "amount": 1250.0,
+              "id": 200
+            },
+            {
+              "code": {
+                "key": "1600",
+                "value": "Fuel surcharge"
+              },
+              "qty": 1,
+              "price": 187.5,
+              "amount": 187.5,
+              "id": 201
+            },
+            {
+              "code": {
+                "key": "1600",
+                "value": "Detention"
+              },
+              "qty": 1,
+              "price": 150.0,
+              "amount": 150.0,
+              "id": 202
+            }
+          ]
+        },
+        "payment": []
+      }
+    ]
+  },
+  "simulation": {
+    "synthetic": true
+  }
+}

@@ -1,0 +1,46 @@
+{
+  "Status": "SUCCESS",
+  "details": {
+    "id": 91000004,
+    "customId": "31000-00014",
+    "status": {
+      "code": {
+        "key": "2101",
+        "value": "Delivered"
+      }
+    },
+    "modeInfo": [],
+    "carrierOrder": [
+      {
+        "id": 71000004,
+        "carrier": {
+          "id": 6004,
+          "name": "Sunrise Cargo Movers"
+        },
+        "costs": {
+          "totalAmount": 450.0,
+          "transactionCurrency": {
+            "key": "1500",
+            "value": "USD"
+          },
+          "lineItem": [
+            {
+              "code": {
+                "key": "1600",
+                "value": "Drayage"
+              },
+              "qty": 1,
+              "price": 450.0,
+              "amount": 450.0,
+              "id": 200
+            }
+          ]
+        },
+        "payment": []
+      }
+    ]
+  },
+  "simulation": {
+    "synthetic": true
+  }
+}

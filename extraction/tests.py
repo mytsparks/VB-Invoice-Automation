@@ -27,6 +27,7 @@ def invoice_json(**overrides):
     invoice = {
         "shipment_id": field("31000-00001"),
         "carrier_name": field("Northwind Freight Lines"),
+        "factoring_company": field(None),
         "invoice_number": field("NW-1"),
         "invoice_date": field("2026-08-14"),
         "currency": field("USD"),
@@ -69,9 +70,15 @@ class NormalizeTests(SimpleTestCase):
         self.assertIsNone(parse_amount("n/a"))
         self.assertIsNone(parse_amount(None))
 
-    def test_dates_only_trust_iso(self):
+    def test_ambiguous_dates_are_not_guessed(self):
         self.assertEqual(parse_date("2026-08-14").isoformat(), "2026-08-14")
         self.assertIsNone(parse_date("03/04/2026"))
+
+    def test_dates_with_a_clear_order_are_parsed(self):
+        self.assertEqual(parse_date("9/14/2026").isoformat(), "2026-09-14")
+        self.assertEqual(parse_date("14/09/2026").isoformat(), "2026-09-14")
+        self.assertEqual(parse_date("Sep 14, 2026").isoformat(), "2026-09-14")
+        self.assertIsNone(parse_date("31/31/2026"))
 
     def test_shipment_id(self):
         self.assertEqual(normalize_shipment_id("Ref 31234 - 56789"), "31234-56789")

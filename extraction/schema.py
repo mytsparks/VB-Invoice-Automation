@@ -44,6 +44,7 @@ class LineItem(BaseModel):
 class InvoiceData(BaseModel):
     shipment_id: FieldValue
     carrier_name: FieldValue
+    factoring_company: FieldValue
     invoice_number: FieldValue
     invoice_date: FieldValue
     currency: FieldValue

@@ -19,6 +19,7 @@ INSTALLED_APPS = [
     "intake",
     "extraction",
     "matching",
+    "processing",
     "reporting",
 ]
 
